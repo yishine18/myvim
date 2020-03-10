@@ -1,0 +1,539 @@
+au VimEnter * silent! !xmodmap -e 'remove Lock = Caps_Lock' -e 'keysym Caps_Lock = Escape'
+au VimLeave * silent! !xmodmap -e 'keycode 66 = Caps_Lock' -e 'add Lock = Caps_Lock'
+
+set nocompatible                " don't bother with vi compatibility "
+set autoread                    " reload files when changed on disk, i.e. via `git checkout` "
+set title                       " change the terminal's title "
+set nobackup                    " do not keep a backup file "
+set noerrorbells                " don't beep "
+set encoding=utf-8
+set ruler                       " show the current row and column "
+set number                      " show line numbers "
+set nowrap                      "nowrap 设置超过窗口宽度的行不自动回绕显示
+set showcmd                     " display incomplete commands "
+set showmode                    " display current modes "
+set showmatch                   " jump to matches when entering parentheses "
+set matchtime=2                 " tenths of a second to show the matching parenthesis "
+set hlsearch                    " highlight searches "
+exec "nohlsearch"
+set incsearch                   " do incremental searching, search as you type "
+set ignorecase                  " ignore case when searching "如果搜索模式中包含大写字母，Vim就会认为当前的查找(搜索)是区分大小写的。
+set smartcase                   " no ignorecase if Uppercase char present "如果搜索模式中不包含任何大写字母，Vim 则会认为搜索应该不区分大小写。
+set expandtab                   " expand tabs to spaces "
+set smarttab                    "表示插入 Tab 时使用 shiftwidth
+set shiftround                  "缩进列数对齐到 shiftwidth 值的整数倍
+set autoindent smartindent shiftround  "新增加的行和前一行具有相同的缩进形式
+set shiftwidth=4
+set tabstop=4                    "选项设置按下 Tab 键时，缩进的空格个数
+set cursorcolumn                 "设置高亮显示光标当前所在列
+set cursorline                   "cursorline 设置高亮显示光标所在屏幕行
+set visualbell t_vb=             "既不想要响铃也不想要闪烁
+set t_vb=
+set timeoutlen=500
+set list
+set listchars=tab:▸\ ,trail:▫
+
+let g:indentLine_char = "┊"
+let g:indentLine_first_char = "┊"
+" 设置对齐线默认开1/关0状态
+let g:indentLine_enabled = 1
+
+filetype on
+filetype plugin on
+filetype indent on
+filetype plugin indent on
+autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
+autocmd FileType ruby set tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
+autocmd BufRead,BufNew *.md,*.mkd,*.markdown set filetype=markdown.mkd
+autocmd BufNewFile *.sh,*.py exec \":call AutoSetFileHead()\"
+function! AutoSetFileHead()
+    " .sh "
+    if &filetype == 'sh'
+        call setline(1, "\#!/bin/bash") endif                                                                                                                                                  
+         
+    " python "     
+    if &filetype == 'python'
+        call setline(1, "\#!/usr/bin/env python")
+        call append(1, "\# encoding: utf-8")
+    endif
+
+    normal G
+    normal o
+    normal o
+endfunc
+
+autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
+fun! <SID>StripTrailingWhitespaces()
+    let l = line(".")                                                                                                                                      
+    let c = col(".")
+    %s/\s\+$//e     
+    call cursor(l, c)
+endfun
+
+"打开/关闭显示行号按键映射
+nnoremap <F2> :set nu! nu?<CR>
+
+let mapleader=","
+"举例map ,A oanother line <Esc>        "将Vim命令串 oanother line <Esc> 映射为快捷键 ,A，这样输入 ,A 就可以快速地在当前行插入新的一行
+"oanother line <Esc> 表示先输入 o 进入插入模式，然后输出 another line，再按下 Esc 退出插入模式，进入命令模式
+"map a b 在map生效的情况下，按下a就等同于按下了b
+"在map命令前加上前缀可以组合成几种不同的命令，表示在不同的Vim模式下生效。
+"n                     在普通模式 (normal) 下生效
+"i                     在插入模式 (insert) 下生效
+"v                     在可视化模式 (visual) 下生效
+"c                     在命令模式 (command-line) 下生效
+"o                     在命令等待时 (operator pending) 生效，比如输入d之后会等待输入下一个字符，可能是d或者数字
+"un                   删除键的映射
+"nore              非递归 (non-recursive)，意思是将a 映射为b，b映射为c，输入a的时候不会被映射为c，而只会映射为b
+"以上前缀可以组合使用，比如 nnoremap，nunmap，vnoremap 等。不带前缀的map命令默认对 normal 模式和 visual 模式生效
+"Vim :map 默认是递归映射模式。
+"<CR> == 回车
+
+nnoremap U <C-r>                    "通过 u 可撤销上次的操作，而组合命令 <Ctrl r> == U 可取消撤销操作
+
+"括号自动补全映射,在插入模式下非递归映射(为 )<Esc>i
+inoremap ( ()<Esc>i
+inoremap [ []<Esc>i
+inoremap { {}<Esc>i
+inoremap " ""<Esc>i
+inoremap ' ''<Esc>i
+"这样输入(, [, {, “，' 的时候都会自动补全，并且把光标移到括号的内部
+
+nnoremap ; :                    "进入命令模式比较方便
+inoremap kj <Esc>               "输入模式下，按下kj相于按下<Esc>进入normal模式
+nnoremap <leader>q :q<CR>       "退出，q!好像有问题
+nnoremap <leader>w :w<CR>       "写入
+"cnoremap <C-a> :<Home>          "不生效?为什么?光标移动到最前面
+
+"nnoremap k gk                  "不生效
+"nnoremap gk k
+"nnoremap j gj
+"nnoremap gj j
+"nnoremap H ^                     "行首?不生效
+"nnoremap L $                     "行尾
+
+"silient 命令用于安静地执行命令，既不显示正常的消息，也不会把它加进消息历史
+noremap <silent><leader>/ :nohls<CR>    ”取消 Vim 查找高亮显示
+
+nnoremap <silent> n nzz             "nzz 表示把下一个查找匹配项所在的行显示在屏幕的最中间
+"nnoremap <silent> N Nzz             " N的作用与 n 相反，是往上反向搜索目标单词
+
+"Vim 的普通模式下按 B 一键执行 Python 代码
+" 按 B 执行当前 Python 代码"
+map B :call PRUN()<CR>
+func! PRUN()
+    exec "w" 
+    if &filetype == 'python'
+        exec "!python %"
+    endif
+endfunc
+
+"从光标到行尾 所在范围的文本，可使用 y$ 命令
+"Vim 普通模式下，^ 命令可将光标移动到当前行的第一个非空字符；$ 可将光标移动到当前行的行尾。
+"将大写的 Y 按键映射为 y$
+map Y y$
+
+map <C-j> <C-W>j                     "切换到下面到分割窗口                                                                                      
+map <C-k> <C-W>k                     "切换到上面到分割窗口
+map <C-h> <C-W>h                     "切换到左边到分割窗口
+map <C-l> <C-W>l                     "切换到右边到分割窗口
+
+map sl :set splitright<CR>:vsplit<CR>
+map sk :set nosplitbelow<CR>:split<CR>
+map sj :set splitbelow<CR>:split<CR>
+map sh :set nosplitright<CR>:vsplit<CR>
+
+map <up><up> :res -5<CR>
+map <down><down> :res +5<CR>
+map <left><left> :vertical resize-5<CR>
+map <right><right> :vertical resize+5<CR>
+
+map <leader>sa ggVG"                "全选当前文件所有文本的效果
+
+" ^	移动到实际行的第一个非空白字符
+" $	移动到实际行的行尾
+" g^	移动到屏幕行的第一个非空白字符
+" g$	移动到屏幕行的行尾
+" g0	移动到屏幕行的行首
+" 0	移动到实际行的行首
+
+
+"Backspace的映射
+"Backspace的功能是向前删除，而x键是向后删除，在normal模式下z键没有什么作用。所以用z键实现backspace的功能是个不错的选择
+
+nnoremap z i<BS><Esc>l
+"normal模式用 z 删除就可以实现Backspace的功能
+
+"Vim快捷键与Leader键
+"Vim的 mapleader 变量对所有map映射命令起效，它的作用是将参数 <leader> 替换成 mapleader 变量的值
+"如果 mapleader 变量没有设置，则用默认的反斜杠 \代替，因此Vim映射 :map <Leader>A oanother line<Esc> 等效于：:map \A oanother line<Esc>
+"简单理解 mapleader == \
+"Vim中的前缀键 <Leader> 类似于C++中的命名空间，可以理解为是某个Vim命令开始执行(前缀)的标识。
+"默认的Vim <Leader> 是 \，在Vim命令模式下，可以使用命令 :m命令开始执行(前缀)的标识。
+"默认的Vim <Leader> 是 \，在Vim命令模式下，可以使用命令let mapleader="," 设置Vim的Leader键为 ,
+"这样子，通过Vim命令 :map ,A oanother line <Esc> 可以设置Vim快捷键 ,A 用于实现在当前行新增一行，插入another line并退到命令模式
+
+
+"==========================================================================================
+call plug#begin('~/.vim/plugged')
+
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'connorholyday/vim-snazzy'
+Plug 'kien/rainbow_parentheses.vim'
+Plug 'preservim/nerdtree'
+Plug 'preservim/nerdcommenter'
+Plug 'majutsushi/tagbar'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'tpope/vim-fugitive'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
+
+"=========================================================================
+call plug#end()
+
+"
+"vim-airline config
+"
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+"change the airline themes,the name of theme in  -> /home/hero/.vim/plugged/vim-airline-themes/autoload/airline/themes
+"let g:airline_theme='angr'
+
+"
+"connorholyday/vim-snazzy config
+"
+let g:SnazzyTransparent = 1
+color snazzy
+
+"
+"neoclide/coc.nvim config      自动补全
+"
+" TextEdit might fail if hidden is not set.
+set hidden
+set nowritebackup
+" Give more space for displaying messages.
+set cmdheight=2
+" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
+" delays and poor user experience.
+set updatetime=300
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+set signcolumn=yes
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+inoremap <silent><expr> <c-space> coc#refresh()
+
+" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current
+" position. Coc only does snippet and additional edit on confirm.
+if has('patch8.1.1068')
+  " Use `complete_info` if your (Neo)Vim version supports it.
+  inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+else
+  imap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+endif
+
+" Use `[g` and `]g` to navigate diagnostics
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code.
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+augroup mygroup
+  autocmd!
+  " Setup formatexpr specified filetype(s).
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder.
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Applying codeAction to the selected region.
+" Example: `<leader>aap` for current paragraph
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+" Remap keys for applying codeAction to the current line.
+nmap <leader>ac  <Plug>(coc-codeaction)
+" Apply AutoFix to problem on the current line.
+nmap <leader>qf  <Plug>(coc-fix-current)
+
+" Introduce function text object
+" NOTE: Requires 'textDocument.documentSymbol' support from the language server.
+xmap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap if <Plug>(coc-funcobj-i)
+omap af <Plug>(coc-funcobj-a)
+
+" Use <TAB> for selections ranges.
+" NOTE: Requires 'textDocument/selectionRange' support from the language server.
+" coc-tsserver, coc-python are the examples of servers that support it.
+nmap <silent> <TAB> <Plug>(coc-range-select)
+xmap <silent> <TAB> <Plug>(coc-range-select)
+
+" Add `:Format` command to format current buffer.
+command! -nargs=0 Format :call CocAction('format')
+
+" Add `:Fold` command to fold current buffer.
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" Add `:OR` command for organize imports of the current buffer.
+command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+
+" Add (Neo)Vim's native statusline support.
+" NOTE: Please see `:h coc-status` for integrations with external plugins that
+" provide custom statusline: lightline.vim, vim-airline.
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+" Mappings using CoCList:
+" Show all diagnostics.
+nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions.
+nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+" Show commands.
+nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document.
+nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols.
+nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list.
+nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+
+
+"
+"ctrlpvim/ctrlp.vim config  使用 ctrlp插件在 Vim 内直接完成这种模糊操作并在 Vim 内打开要搜索的目标文件
+"
+let g:ctrlp_map = '<c-p>'
+let g:ctrlp_cmd = 'CtrlP'
+let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_root_markers = ['pom.xml', '.p4ignore']
+let g:ctrlp_switch_buffer = 'et'
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux
+set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe  " Windows
+let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+  \ 'file': '\v\.(exe|so|dll)$',
+  \ 'link': 'some_bad_symbolic_links',
+  \ }
+"let g:ctrlp_user_command = 'find %s -type f'        " MacOSX/Linux
+let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
+
+"
+"kien/rainbow_parentheses.vim  config
+"
+let g:rbpt_colorpairs = [
+    \ ['brown',       'RoyalBlue3'],
+    \ ['Darkblue',    'SeaGreen3'],
+    \ ['darkgray',    'DarkOrchid3'],
+    \ ['darkgreen',   'firebrick3'],
+    \ ['darkcyan',    'RoyalBlue3'],
+    \ ['darkred',     'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['brown',       'firebrick3'],
+    \ ['gray',        'RoyalBlue3'],
+    \ ['black',       'SeaGreen3'],
+    \ ['darkmagenta', 'DarkOrchid3'],
+    \ ['Darkblue',    'firebrick3'],
+    \ ['darkgreen',   'RoyalBlue3'],
+    \ ['darkcyan',    'SeaGreen3'],
+    \ ['darkred',     'DarkOrchid3'],
+    \ ['red',         'firebrick3'],
+    \ ]
+let g:rbpt_max = 16
+let g:rbpt_loadcmd_toggle = 0
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
+
+let s:pairs = [
+	\ ['brown',       'RoyalBlue3'],
+	\ ['Darkblue',    'SeaGreen3'],
+	\ ['darkgray',    'DarkOrchid3'],
+	\ ['darkgreen',   'firebrick3'],
+	\ ['darkcyan',    'RoyalBlue3'],
+	\ ['darkred',     'SeaGreen3'],
+	\ ['darkmagenta', 'DarkOrchid3'],
+	\ ['brown',       'firebrick3'],
+	\ ['gray',        'RoyalBlue3'],
+	\ ['black',       'SeaGreen3'],
+	\ ['darkmagenta', 'DarkOrchid3'],
+	\ ['Darkblue',    'firebrick3'],
+	\ ['darkgreen',   'RoyalBlue3'],
+	\ ['darkcyan',    'SeaGreen3'],
+	\ ['darkred',     'DarkOrchid3'],
+	\ ['red',         'firebrick3'],
+	\ ]
+let s:pairs = exists('g:rbpt_colorpairs') ? g:rbpt_colorpairs : s:pairs
+let s:max = exists('g:rbpt_max') ? g:rbpt_max : max([len(s:pairs), 16])
+let s:loadtgl = exists('g:rbpt_loadcmd_toggle') ? g:rbpt_loadcmd_toggle : 0
+let s:types = [['(',')'],['\[','\]'],['{','}'],['<','>']]
+
+func! s:extend()
+	if s:max > len(s:pairs)
+		cal extend(s:pairs, s:pairs)
+		cal s:extend()
+	elseif s:max < len(s:pairs)
+		cal remove(s:pairs, s:max, -1)
+	endif
+endfunc
+cal s:extend()
+
+func! s:cluster()
+	let levels = join(map(range(1, s:max), '"level".v:val'), ',')
+	exe 'sy cluster rainbow_parentheses contains=@TOP'.levels.',NoInParens'
+endfunc
+cal s:cluster()
+
+"
+"preservim/nerdtree config
+"
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+map tt :NERDTreeToggle<CR>
+let NERDTreeMapOpenExpl = ""
+let NERDTreeMapUpdir = ""
+let NERDTreeMapUpdirKeepOpen = "l"
+let NERDTreeMapOpenSplit = ""
+let NERDTreeOpenVSplit = ""
+let NERDTreeMapActivateNode = "i"
+let NERDTreeMapOpenInTab = "o"
+let NERDTreeMapPreview = ""
+let NERDTreeMapCloseDir = "n"
+let NERDTreeMapChangeRoot = "y"
+
+"
+"preservim/nerdcommenter config
+"
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+" Use compact syntax for prettified multi-line comments
+let g:NERDCompactSexyComs = 1
+" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDDefaultAlign = 'left'
+" Set a language to use its alternate delimiters by default
+let g:NERDAltDelims_java = 1
+" Add your own custom formats or override the defaults
+let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
+" Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDCommentEmptyLines = 1
+" Enable trimming of trailing whitespace when uncommenting
+let g:NERDTrimTrailingWhitespace = 1
+" Enable NERDCommenterToggle to check all selected lines is commented or not 
+let g:NERDToggleCheckAllLines = 1
+"Default mappings
+"[count]<leader>cc |NERDCommenterComment|
+"[count]<leader>cu |NERDCommenterUncomment|
+"[count]<leader>cn |NERDCommenterNested|
+"[count]<leader>c<space> |NERDCommenterToggle|
+"[count]<leader>cm |NERDCommenterMinimal|
+"[count]<leader>ci |NERDCommenterInvert|
+"[count]<leader>cs |NERDCommenterSexy|
+"[count]<leader>cy |NERDCommenterYank|
+"<leader>c$ |NERDCommenterToEOL|
+"<leader>cA |NERDCommenterAppend|
+"<leader>ca |NERDCommenterAltDelims|
+"[count]<leader>cl |NERDCommenterAlignLeft
+"[count]<leader>cb |NERDCommenterAlignBoth
+
+" ===
+" === majutsushi/tagbar
+" ===
+nmap <silent> T :TagbarToggle<CR>
+
+"
+" NERDTree-git-plugin config
+"
+let g:NERDTreeIndicatorMapCustom = {
+    \ "Modified"  : "✹",
+    \ "Staged"    : "✚",
+    \ "Untracked" : "✭",
+    \ "Renamed"   : "➜",
+    \ "Unmerged"  : "═",
+    \ "Deleted"   : "✖",
+    \ "Dirty"     : "✗",
+    \ "Clean"     : "✔︎",
+    \ 'Ignored'   : '☒',
+    \ "Unknown"   : "?"
+    \ }
+
+"
+"iamcco/markdown-preview
+"
+let g:mkdp_auto_start = 0
+let g:mkdp_auto_close = 1
+let g:mkdp_refresh_slow = 0
+let g:mkdp_command_for_global = 0
+let g:mkdp_open_to_the_world = 0
+let g:mkdp_open_ip = ''
+let g:mkdp_browser = ''
+let g:mkdp_echo_preview_url = 0
+let g:mkdp_browserfunc = ''
+let g:mkdp_preview_options = {
+    \ 'mkit': {},
+    \ 'katex': {},
+    \ 'uml': {},
+    \ 'maid': {},
+    \ 'disable_sync_scroll': 0,
+    \ 'sync_scroll_type': 'middle',
+    \ 'hide_yaml_meta': 1,
+    \ 'sequence_diagrams': {},
+    \ 'flowchart_diagrams': {}
+    \ }
+let g:mkdp_markdown_css = ''
+" use a custom highlight style must absolute path
+" like '/Users/username/highlight.css' or expand('~/highlight.css')
+let g:mkdp_highlight_css = ''
+let g:mkdp_port = ''
+let g:mkdp_page_title = '「${name}」'
+
+nmap mm <Plug>MarkdownPreview
+nmap ms <Plug>MarkdownPreviewStop
+"nmap <C-p> <Plug>MarkdownPreviewToggle
+
